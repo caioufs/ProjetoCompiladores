@@ -7,6 +7,9 @@ Helpers
  letra = (maiusculo | minusculo);
  letras = letra*;
  digitos = digito*;
+ numero_real = digitos+','+digitos;
+ id_cientifico = ('e' | 'E');
+ notacao_cientifica = digito+id_cientifico+('-'?)+digitos;
  letras_ou_digitos = letras | digitos;
  underline = '_';
  espaco = ' ';
@@ -20,14 +23,54 @@ Helpers
  blank = rc | nl | ht | lf | ff | cr;
  
 Tokens
- numero = digito+;
+
+ // Atributos Principais
+ molde = 'molde';
+ se = 'se';
+ senao = 'senao';
+ passa = 'passa';
+ por = 'por';
+ contem = 'contem';
+ fim = 'fim';
+ constante = 'constante';
+ funcao = 'funcao';
+ objeto = 'objeto';
+ 
+ // Tipos
+ bool = 'Bool';
+ numero = 'Numero';
+ texto = 'Texto';
+ verdade = 'verdade';
+ falso = 'falso';
+ 
+
+ // Operacoes Matematicas e Logicas
+ numeros = digitos | numero_real | notacao_cientifica;
  soma = '+';
  menos = '-';
  mult = '*';
  div = '/';
  mod = '%';
+ atribuicao = '=';
+ comparacao = '==';
+ dois_maior = '>>';
+ 
+ // Delimitadores
+ abre_bloco = '[';
+ fecha_bloco = ']';
  par_esq = '(';
  par_dir = ')';
+ dois_pontos = ':';
+ aspas_dupla = '"';
+ aspas_simples = ''';
+ virgula = ',';
+ ponto_virgula = ';';
+ ponto = '.';
+ pipe = '|';
+ 
+ // Identificadores
+ id_molde = maiusculo letras_ou_digitos*;
+ id = minusculo (letras_ou_digitos | underline)*;
  
  // Vazio
  vazio = (espaco | '\t' | '\n' | '\r' | blank)+;
