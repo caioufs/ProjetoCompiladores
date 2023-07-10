@@ -2,9 +2,22 @@ Package bemtevi;
 
 Helpers
  digito = ['0' .. '9'];
+ minusculo = ['a' .. 'z'];
+ maiusculo = ['A' .. 'Z'];
+ letra = (maiusculo | minusculo);
+ letras = letra*;
+ digitos = digito*;
+ letras_ou_digitos = letras | digitos;
+ underline = '_';
  espaco = ' ';
  rc = 13;
  nl = 10;
+ ht	= 0x0009;
+ lf	= 0x000a;
+ ff	= 0x000c;
+ cr	= 0x000d;
+ eol = cr | nl | cr | nl ;
+ blank = rc | nl | ht | lf | ff | cr;
  
 Tokens
  numero = digito+;
@@ -15,9 +28,17 @@ Tokens
  mod = '%';
  par_esq = '(';
  par_dir = ')';
- vazio = (espaco | rc | nl)+;
+ 
+ // Vazio
+ vazio = (espaco | '\t' | '\n' | '\r' | blank)+;
+ 
+ // Comentarios
+ comentario_linha = ('--'[[ 0 .. 0xffff]-[cr+nl]]*eol);
+ comentario_bloco = ('{'[0..0xffff]+'}');
 
 
 Ignored Tokens
+ comentario_bloco,
+ comentario_linha,
  vazio;
 
