@@ -1,0 +1,64 @@
+molde Calculadora
+
+
+molde Calculadora contem
+    funcao: Numero somar(Numero a | Numero b) [
+        a + b;
+    ]
+
+
+    funcao: Numero subtrair(Numero a | Numero b)[
+        a - b;
+    ]
+
+
+    funcao: Numero multiplicar(Numero a | Numero b)[
+        a * b;
+    ]
+
+
+    funcao: Numero dividir(Numero a | Numero b)[
+        a / b;
+    ]
+fim
+
+molde Principal contem        
+        
+        objeto : Comunicacao interface;
+
+
+>> funcao: Texto principal()
+[
+    constante: Numero numeroUm;
+    constante: Numero numeroDois;
+    constante: Texto operador;
+    Numero resultado;
+
+    escreva("Digite o primeiro número: ");
+    interface.leiaNumero(numeroUm);
+
+    escreva("Digite o segundo número: ");
+    interface.leiaNumero(numeroDois);
+
+    escreva("Digite o operador (+, -, *, /): ");
+    interface.leiaTexto(operador);
+
+
+    se (operador == "+") entao
+        resultado = Calculadora.Somar( numeroUm | numeroDois);
+    senao se (operador == "-") entao
+        resultado = Calculadora.Subtrair( numeroUm | numeroDois);
+    senao se (operador == "*") entao
+        resultado = Calculadora.Multiplicar( numeroUm | numeroDois);
+    senao se (operador == "/") entao
+        resultado = Calculadora.Dividir(numeroUm | numeroDois);
+    senao
+        interface.escreva("Operador inválido!");
+
+
+    interface.escreva("Resultado: ");
+    interface.escreva(resultado);
+
+
+]
+fim
