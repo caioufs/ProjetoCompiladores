@@ -2,22 +2,89 @@ Package bemtevi;
 
 Helpers
  digito = ['0' .. '9'];
+ minusculo = ['a' .. 'z'];
+ maiusculo = ['A' .. 'Z'];
+ letra = (maiusculo | minusculo);
+ letras = letra*;
+ digitos = digito*;
+ numero_real = digitos+','+digitos;
+ id_cientifico = ('e' | 'E');
+ notacao_cientifica = digito+id_cientifico+('-'?)+digitos;
+ letras_ou_digitos = letras | digitos;
+ underline = '_';
  espaco = ' ';
  rc = 13;
  nl = 10;
+ ht	= 0x0009;
+ lf	= 0x000a;
+ ff	= 0x000c;
+ cr	= 0x000d;
+ eol = cr | nl | cr | nl ;
+ blank = rc | nl | ht | lf | ff | cr;
  
 Tokens
- numero = digito+;
+
+ // Atributos Principais
+ molde = 'molde';
+ se = 'se';
+ senao = 'senao';
+ passa = 'passa';
+ por = 'por';
+ contem = 'contem';
+ fim = 'fim';
+ constante = 'constante';
+ funcao = 'funcao';
+ objeto = 'objeto';
+ 
+ // Tipos
+ bool = 'Bool';
+ numero = 'Numero';
+ texto = 'Texto';
+ verdade = 'verdade';
+ falso = 'falso';
+ 
+
+ // Operacoes Matematicas e Logicas
+ numeros = digitos | numero_real | notacao_cientifica;
  soma = '+';
  menos = '-';
  mult = '*';
  div = '/';
  mod = '%';
+ atribuicao = '=';
+ menor = '<';
+ menor_igual = '<=';
+ comparacao = '==';
+ negacao = '!';
+ dois_maior = '>>';
+ 
+ // Delimitadores
+ abre_bloco = '[';
+ fecha_bloco = ']';
  par_esq = '(';
  par_dir = ')';
- vazio = (espaco | rc | nl)+;
+ dois_pontos = ':';
+ aspas_dupla = '"';
+ aspas_simples = ''';
+ virgula = ',';
+ ponto_virgula = ';';
+ ponto = '.';
+ pipe = '|';
+ 
+ // Identificadores
+ id_molde = maiusculo letras_ou_digitos*;
+ id = minusculo (letras_ou_digitos | underline)*;
+ 
+ // Vazio
+ vazio = (espaco | '\t' | '\n' | '\r' | blank)+;
+ 
+ // Comentarios
+ comentario_linha = ('--'[[ 0 .. 0xffff]-[cr+nl]]*eol);
+ comentario_bloco = ('{'[0..0xffff]+'}');
 
 
 Ignored Tokens
+ comentario_bloco,
+ comentario_linha,
  vazio;
 
