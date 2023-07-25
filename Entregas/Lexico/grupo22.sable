@@ -52,7 +52,10 @@ Tokens
  div = '/';
  mod = '%';
  atribuicao = '=';
+ menor = '<';
+ menor_igual = '<=';
  comparacao = '==';
+ negacao = '!';
  dois_maior = '>>';
  
  // Delimitadores
@@ -61,8 +64,8 @@ Tokens
  par_esq = '(';
  par_dir = ')';
  dois_pontos = ':';
- aspas_dupla = '"';
- aspas_simples = ''';
+ aspas_dupla = ('"'[0..0xffff]+'"');
+ aspas_simples = ('''[0..0xffff]+''');
  virgula = ',';
  ponto_virgula = ';';
  ponto = '.';
@@ -76,7 +79,7 @@ Tokens
  vazio = (espaco | '\t' | '\n' | '\r' | blank)+;
  
  // Comentarios
- comentario_linha = ('--'[[ 0 .. 0xffff]-[cr+nl]]*eol);
+ comentario_linha = ('--'[[ 0 .. 0xffff]-[cr+nl]]*);
  comentario_bloco = ('{'[0..0xffff]+'}');
 
 
