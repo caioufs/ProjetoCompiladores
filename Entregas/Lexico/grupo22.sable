@@ -13,6 +13,7 @@ Helpers
  letras_ou_digitos = letras | digitos;
  underline = '_';
  espaco = ' ';
+ string_input = [0..0xffff]*;
  rc = 13;
  nl = 10;
  ht	= 0x0009;
@@ -35,6 +36,7 @@ Tokens
  constante = 'constante';
  funcao = 'funcao';
  objeto = 'objeto';
+ string = (''' string_input ''' | '"' string_input '"');
  
  // Tipos
  bool = 'Bool';
@@ -64,8 +66,6 @@ Tokens
  par_esq = '(';
  par_dir = ')';
  dois_pontos = ':';
- aspas_dupla = ('"'[0..0xffff]+'"');
- aspas_simples = ('''[0..0xffff]+''');
  virgula = ',';
  ponto_virgula = ';';
  ponto = '.';
