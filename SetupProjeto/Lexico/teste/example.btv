@@ -52,12 +52,12 @@ molde Principal contem
 			entao
 				[
 					constante veiculoNovo;
-					interface.leia("Qual veiculo voce deseja")
+					interface.leia("Qual veiculo você deseja");
 					interface.leia(veiculoNovo);
 					veiculo = trocarVeiculo(veiculoNovo | velocidadeMinima | interface)
 				]
-			
-		interface.escreva("Sua velocidade e: ", veiculo.velocidadeMinima);
+
+		interface.escreva("é": , veiculo.velocidadeMinima);
 	]
 
 funcao: Veiculo transporte (Numero velocidadeMinima)
