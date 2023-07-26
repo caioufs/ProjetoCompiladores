@@ -14,6 +14,8 @@ Helpers
  underline = '_';
  espaco = ' ';
  tudo_unicode = [0..0xffff];
+ string_input = [tudo_unicode - ['''+'"']];
+ comentario_blc = [tudo_unicode - '{'];
  rc = 13;
  nl = 10;
  ht	= 0x0009;
@@ -36,7 +38,7 @@ Tokens
  constante = 'constante';
  funcao = 'funcao';
  objeto = 'objeto';
- string = (''' tudo_unicode* ''' | '"' tudo_unicode* '"');
+ string = (''' string_input* ''' | '"' string_input* '"');
  
  // Tipos
  bool = 'Bool';
@@ -80,7 +82,7 @@ Tokens
  
  // Comentarios
  comentario_linha = ('--'[tudo_unicode-[cr+nl]]*);
- comentario_bloco = ('{'tudo_unicode+'}');
+ comentario_bloco = ('{'comentario_blc*'}');
 
 
 Ignored Tokens
