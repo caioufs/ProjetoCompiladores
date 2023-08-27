@@ -1,0 +1,108 @@
+Package bemtevi;
+
+Helpers
+ digito = ['0' .. '9'];
+ minusculo = ['a' .. 'z'];
+ maiusculo = ['A' .. 'Z'];
+ letra = (maiusculo | minusculo);
+ letras = letra*;
+ digitos = digito*;
+ numero_real = digitos+','+digitos;
+ id_cientifico = ('e' | 'E');
+ notacao_cientifica = digito+id_cientifico+('-'?)+digitos;
+ letras_ou_digitos = letras | digitos;
+ underline = '_';
+ espaco = ' ';
+ tudo_unicode = [0..0xffff];
+ string_input = [tudo_unicode - ['''+'"']];
+ comentario_blc = [tudo_unicode - '{'];
+ rc = 13;
+ nl = 10;
+ ht	= 0x0009;
+ lf	= 0x000a;
+ ff	= 0x000c;
+ cr	= 0x000d;
+ eol = cr | nl | cr | nl ;
+ blank = rc | nl | ht | lf | ff | cr;
+ 
+Tokens
+
+ // Atributos Principais
+ molde = 'molde';
+ se = 'se';
+ senao = 'senao';
+ passa = 'passa';
+ por = 'por';
+ contem = 'contem';
+ fim = 'fim';
+ constante = 'constante';
+ funcao = 'funcao';
+ objeto = 'objeto';
+ string = (''' string_input* ''' | '"' string_input* '"');
+ 
+ // Tipos
+ bool = 'Bool';
+ numero = 'Numero';
+ texto = 'Texto';
+ verdade = 'verdade';
+ falso = 'falso';
+ 
+
+ // Operacoes Matematicas e Logicas
+ numeros = digitos | numero_real | notacao_cientifica;
+ soma = '+';
+ menos = '-';
+ mult = '*';
+ div = '/';
+ mod = '%';
+ atribuicao = '=';
+ menor = '<';
+ menor_igual = '<=';
+ comparacao = '==';
+ negacao = '!';
+ dois_maior = '>>';
+ 
+ // Delimitadores
+ abre_bloco = '[';
+ fecha_bloco = ']';
+ par_esq = '(';
+ par_dir = ')';
+ dois_pontos = ':';
+ virgula = ',';
+ ponto_virgula = ';';
+ ponto = '.';
+ pipe = '|';
+ 
+ // Identificadores
+ id_molde = maiusculo letras_ou_digitos*;
+ id = minusculo (letras_ou_digitos | underline)*;
+ 
+ // Vazio
+ vazio = (espaco | '\t' | '\n' | '\r' | blank)+;
+ 
+ // Comentarios
+ comentario_linha = ('--'[tudo_unicode-[cr+nl]]*);
+ comentario_bloco = ('{'comentario_blc*'}');
+
+
+Ignored Tokens
+ comentario_bloco,
+ comentario_linha,
+ vazio;
+ 
+Productions
+ expr =
+   {fator} fator 
+  |{soma} expr soma fator 
+  |{menos} expr menos fator;
+
+ fator =
+   {termo} termo 
+  |{mult} fator mult termo 
+  |{div} fator div termo 
+  |{mod} fator mod termo;
+  
+ termo =
+   {numero} numero 
+  |{par} par_esq expr par_dir;
+
