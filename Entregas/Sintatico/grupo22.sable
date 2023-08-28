@@ -101,6 +101,23 @@ Productions
  
  def_molde = {def_molde} molde id_molde contem atributos metodos fim;
  
- // A partir daqui precisa fazer
- atributos = {atributos} par_esq*;
- metodos = {metodos} par_dir*;
+ attr_aux = {dec_cons} dec_cons | {dec_obj} dec_obj;
+ atributos = {atributos} attr_aux*;
+ metodos = {metodos} dec_funcao*;
+ 
+ dec_cons = {dec_cons} constante dois_pontos tipo_primitivo id ponto_virgula;
+ dec_obj = {dec_obj} objeto dois_pontos tipo_molde id ponto_virgula;
+ 
+ tipo_primitivo = {bool} bool | {numero} numero | {texto} texto;
+ tipo_molde = {tipo_molde} id_molde;
+ tipo = {tipo_molde} tipo_molde | {tipo_primitivo} tipo_primitivo;
+ 
+ dec_funcao =
+ 	{dec_funcao} dois_maior? funcao dois_pontos tipo id [fe]:par_esq parametros [fd]:par_dir bloco |
+ 	{dec_funcao_sem_bloco} dois_maior? funcao dois_pontos tipo id [fwbe]:par_esq parametros [fwbd]:par_dir ponto_virgula
+ ;
+ 
+ // A partir daqui precisa se feito
+ 
+ bloco = {bloco} [teste1]:par_esq*;
+ parametros = {parametros} [teste2]:par_dir*;
