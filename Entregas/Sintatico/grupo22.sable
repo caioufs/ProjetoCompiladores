@@ -91,18 +91,16 @@ Ignored Tokens
  vazio;
  
 Productions
- expr =
-   {fator} fator 
-  |{soma} expr soma fator 
-  |{menos} expr menos fator;
 
- fator =
-   {termo} termo 
-  |{mult} fator mult termo 
-  |{div} fator div termo 
-  |{mod} fator mod termo;
-  
- termo =
-   {numero} numero 
-  |{par} par_esq expr par_dir;
-
+ programa = {programa} familia? def_molde+;
+ 
+ familia_opcional = {familia_opcional} ponto_virgula relacao;
+ familia = {familia} relacao familia_opcional* ponto;
+ 
+ relacao = {relacao} molde [esq]:id_molde se passa por [dir]:id_molde;
+ 
+ def_molde = {def_molde} molde id_molde contem atributos metodos fim;
+ 
+ // A partir daqui precisa fazer
+ atributos = {atributos} par_esq*;
+ metodos = {metodos} par_dir*;
