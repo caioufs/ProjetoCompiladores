@@ -117,7 +117,23 @@ Productions
  	{dec_funcao_sem_bloco} dois_maior? funcao dois_pontos tipo id [fwbe]:par_esq parametros [fwbd]:par_dir ponto_virgula
  ;
  
- // A partir daqui precisa se feito
+ mais_parametro = {mais_parametro} pipe parametro;
+ parametros = {parametros} parametro? mais_parametro*;
+ parametro = {parametro} tipo id | {assinatura} assinatura;
  
- bloco = {bloco} [teste1]:par_esq*;
- parametros = {parametros} [teste2]:par_dir*;
+ assinatura = {assinatura} tipo id par_esq parametros_assinatura par_dir;
+ mais_parametros_assinatura = {mais_parametros_assinatura} pipe parametro_assinatura;
+ parametros_assinatura = {parametros_assinatura} parametro_assinatura? mais_parametros_assinatura*;
+ parametro_assinatura = {tipo} tipo | {assinatura} assinatura;
+ 
+ conteudo_bloco = {dec_cons} dec_cons | {dec_obj} dec_obj | {definicao} definicao; 
+ bloco = {bloco} abre_bloco conteudo_bloco* exp fecha_bloco;
+ 
+ conteudo_definicao = {id} id | {atributo} atributo;
+ definicao = {definicao} conteudo_definicao atribuicao exp ponto_virgula;
+ 
+ mais_atributo = {mais_atributo} ponto id;
+ atributo = {atributo} id mais_atributo+;
+ 
+ // Precisa fazer a partir daqui
+ exp = {exp} numero;
