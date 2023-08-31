@@ -13,6 +13,7 @@ Helpers
  letras_ou_digitos = letras | digitos;
  underline = '_';
  espaco = ' ';
+ tudo_unicode = [0..0xffff];
  rc = 13;
  nl = 10;
  ht	= 0x0009;
@@ -35,6 +36,7 @@ Tokens
  constante = 'constante';
  funcao = 'funcao';
  objeto = 'objeto';
+ string = (''' tudo_unicode* ''' | '"' tudo_unicode* '"');
  
  // Tipos
  bool = 'Bool';
@@ -64,8 +66,6 @@ Tokens
  par_esq = '(';
  par_dir = ')';
  dois_pontos = ':';
- aspas_dupla = ('"'[0..0xffff]+'"');
- aspas_simples = ('''[0..0xffff]+''');
  virgula = ',';
  ponto_virgula = ';';
  ponto = '.';
@@ -79,13 +79,8 @@ Tokens
  vazio = (espaco | '\t' | '\n' | '\r' | blank)+;
  
  // Comentarios
- comentario_linha = ('--'[[ 0 .. 0xffff]-[cr+nl]]*
-
-
-
-
-);
- comentario_bloco = ('{'[0..0xffff]+'}');
+ comentario_linha = ('--'[tudo_unicode-[cr+nl]]*);
+ comentario_bloco = (['{'tudo_unicode-'}]''}');
 
 
 Ignored Tokens

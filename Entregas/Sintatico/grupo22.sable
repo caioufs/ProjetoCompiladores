@@ -135,5 +135,55 @@ Productions
  mais_atributo = {mais_atributo} ponto id;
  atributo = {atributo} id mais_atributo+;
  
- // Precisa fazer a partir daqui
- exp = {exp} numero;
+ // Precisa fazer a partir daqui - REVISAR
+
+// mattematicos
+
+exp = {fator} fator | 
+ {soma} exp soma fator | 
+ {menos} exp menos fator;
+ 
+fator = {termo} termo |
+ {mult} fator mult termo |
+ {div} fator div termo |
+ {mod} fator mod termo;
+
+termo = {numeros} numeros |
+ {termos} par_esq exp par_dir;
+ 
+// Booleano
+
+// instancia = {instancia} id_molde abre_colchete lista_inicializacao? fecha_colchete;
+
+//lista_inicializacao = {lista_inicializacao} inicializacao_objeto mais_inicializacao_objeto*;
+
+//inicializacao_objeto = {inicializacao_objeto} objeto ponto id mais_atributo* igual exp;
+
+//mais_inicializacao_objeto = {mais_inicializacao_objeto} pipe inicializacao_objeto;
+
+//chamada = {chamada} id mais_id* abre_par lista_exp? fecha_par;
+
+//lista_exp = {lista_exp} exp mais_exp*;
+
+//mais_exp = {mais_exp} pipe exp;
+
+//mais_id = {mais_id} ponto id;
+ 
+//se_entao_senao = {se_entao_senao} se par_esq exp par_dir entao exp senao exp;
+
+//par_exp = {par_exp} abre_par exp fecha_par;
+
+//unario_exp = {unario_exp} menos exp | negacao exp;
+
+// binario_exp = 
+//	{binario_exp_soma} exp soma exp |
+//	{binario_exp_subtracao} exp subtracao exp |
+//	{binario_exp_multiplicacao} exp multiplicacao exp |
+//	{binario_exp_divisao} exp divisao exp |
+//	{binario_exp_modulo} exp modulo exp |
+//	{binario_exp_igual} exp igual exp |
+//	{binario_exp_menor} exp menor exp |
+//	{binario_exp_menor_igual} exp menor_igual exp |
+//	{binario_exp_e} exp e exp |
+//	{binario_exp_ou} exp ou exp;
+    
