@@ -55,12 +55,14 @@ Tokens
  mult = '*';
  div = '/';
  mod = '%';
- atribuicao = '=';
+ igual = '=';
  menor = '<';
  menor_igual = '<=';
  comparacao = '==';
  negacao = '!';
  dois_maior = '>>';
+ e = 'e';
+ ou = 'ou';
  
  // Delimitadores
  abre_bloco = '[';
@@ -105,7 +107,9 @@ Productions
  atributos = {atributos} attr_aux*;
  metodos = {metodos} dec_funcao*;
  
- dec_cons = {dec_cons} constante dois_pontos tipo_primitivo id ponto_virgula;
+ dec_cons = {dec_cons} constante dois_pontos tipo_primitivo id ponto_virgula 
+  | {dec_const_init} constante dois_pontos tipo_primitivo id igual exp ponto_virgula 
+ ;
  dec_obj = {dec_obj} objeto dois_pontos tipo_molde id ponto_virgula;
  
  tipo_primitivo = {bool} bool | {numero} numero | {texto} texto;
@@ -127,111 +131,66 @@ Productions
  parametro_assinatura = {tipo} tipo | {assinatura} assinatura;
  
  conteudo_bloco = {dec_cons} dec_cons | {dec_obj} dec_obj | {definicao} definicao; 
- bloco = {bloco} abre_bloco conteudo_bloco* exp fecha_bloco;
+ bloco = {bloco} abre_bloco conteudo_bloco* exp ponto_virgula? fecha_bloco;
  
- conteudo_definicao = {id} id | {atributo} atributo;
- definicao = {definicao} conteudo_definicao atribuicao exp ponto_virgula;
+ // ---------------------------------------------------------------------------------------------------------- //
+ // Esta parte aqui não consegui resolver junto com o exp pois como reduzem para o mesmo sem o ponto e virgula //
+ // Acabei por optar em deixar o exp, já q dava shift/reduce, deixarei como estava antes abaixo                //
+ // ---------------------------------------------------------------------------------------------------------- //
+ // definicao_aux = {t} id | {t2} atributo;																	   //
+ // definicao = {definicao} conteudo_definicao igual exp ponto_virgula; (Código Antigo)						   //
+ // ---------------------------------------------------------------------------------------------------------- //
+ definicao = {definicao} exp ponto_virgula;
  
- mais_atributo = {mais_atributo} ponto id;
- atributo = {atributo} id mais_atributo+;
+ mais_id = {mais_id} ponto id;
+ atributo = {atributo} id mais_id+;
  
-<<<<<<< HEAD
- // Precisa fazer a partir daqui - REVISAR
-
-// mattematicos
-
-exp = {fator} fator | 
- {soma} exp soma fator | 
- {menos} exp menos fator;
+ // Falta transformar isto em exp
+ se_senao = {se_senao} se par_esq [primeira]:exp par_dir [segunda]:exp senao [terceira]:exp;
  
-fator = {termo} termo |
- {mult} fator mult termo |
- {div} fator div termo |
- {mod} fator mod termo;
+ exp = {termo} termo
+  | {soma} exp soma termo
+  | {menos} exp menos termo
+  | {menor} exp menor termo
+  | {igual} exp igual termo
+  | {menor_igual} exp menor_igual termo
+  | {negacao} negacao exp_bool
+  | {negativo} menos termo
+  | {e} exp e termo 
+  // Deixei deste jeito pois nao sabia se o ou era '|' ou 'ou', ja que no codigo de exemplo (pesos.btv) 
+  // esta como '|' mas na documentação esta como 'ou' (Linha Abaixo)
+  | {ou} exp ou termo
+  | {bloco} bloco
+ ;
+   
+ exp_bool = {verdade} verdade | {falso} falso;
+  	
+ termo = {fator} fator
+  | {mult} termo mult fator
+  | {div} termo div fator
+  | {mod} termo mod fator
+ ;
 
-termo = {numeros} numeros |
- {termos} par_esq exp par_dir;
- 
-// Booleano
-
-// instancia = {instancia} id_molde abre_colchete lista_inicializacao? fecha_colchete;
-
-//lista_inicializacao = {lista_inicializacao} inicializacao_objeto mais_inicializacao_objeto*;
-
-//inicializacao_objeto = {inicializacao_objeto} objeto ponto id mais_atributo* igual exp;
-
-//mais_inicializacao_objeto = {mais_inicializacao_objeto} pipe inicializacao_objeto;
-
-//chamada = {chamada} id mais_id* abre_par lista_exp? fecha_par;
-
-//lista_exp = {lista_exp} exp mais_exp*;
-
-//mais_exp = {mais_exp} pipe exp;
-
-//mais_id = {mais_id} ponto id;
- 
-//se_entao_senao = {se_entao_senao} se par_esq exp par_dir entao exp senao exp;
-
-//par_exp = {par_exp} abre_par exp fecha_par;
-
-//unario_exp = {unario_exp} menos exp | negacao exp;
-
-// binario_exp = 
-//	{binario_exp_soma} exp soma exp |
-//	{binario_exp_subtracao} exp subtracao exp |
-//	{binario_exp_multiplicacao} exp multiplicacao exp |
-//	{binario_exp_divisao} exp divisao exp |
-//	{binario_exp_modulo} exp modulo exp |
-//	{binario_exp_igual} exp igual exp |
-//	{binario_exp_menor} exp menor exp |
-//	{binario_exp_menor_igual} exp menor_igual exp |
-//	{binario_exp_e} exp e exp |
-//	{binario_exp_ou} exp ou exp;
-=======
- // Precisa fazer a partir daqui
- exp = {exp} numero
-    | verdade
-    | falso
-    | ID
-    | instancia
-    | atributo
-    | chamada
-    | se_entao_senao
-    | par_exp
-    | unario_exp
-    | binario_exp
-    | bloco;
+ fator = {numeros} numeros
+  | {string} string
+  | {bool} exp_bool
+  | {parenteses} par_esq exp par_dir
+  | {instancia} instancia
+  | {chamada} chamada
+  | {id} id
+  | {atributo} atributo
+ ;
     
-instancia = {instancia} id_molde abre_colchete lista_inicializacao? fecha_colchete;
+ instancia = {instancia} id_molde abre_bloco lista_inicializacao fecha_bloco;
 
-lista_inicializacao = {lista_inicializacao} inicializacao_objeto mais_inicializacao_objeto*;
+ mais_inicializacao_objeto = {mais_inicializacao_objeto} pipe inicializacao_objeto;
+ lista_inicializacao = {lista_inicializacao} inicializacao_objeto mais_inicializacao_objeto*;
 
-inicializacao_objeto = {inicializacao_objeto} objeto ponto id mais_atributo* igual exp;
+ inicializacao_objeto = {inicializacao_objeto} objeto ponto id mais_id* igual [init]:exp;
 
-mais_inicializacao_objeto = {mais_inicializacao_objeto} pipe inicializacao_objeto;
+ // Aqui no codigo exemplo (pesos.btv) esta com ponto_virgula, porem como na documentação da linguagem esta sem
+ // deixei sem ponto e virgula
+ chamada = {chamada} id mais_id* par_esq lista_exp par_dir;
 
-chamada = {chamada} id mais_id* abre_par lista_exp? fecha_par;
-
-lista_exp = {lista_exp} exp mais_exp*;
-
-mais_exp = {mais_exp} pipe exp;
-
-mais_id = {mais_id} ponto id;
- 
-se_entao_senao = {se_entao_senao} se abre_par exp fecha_par entao exp senao exp;
-
-par_exp = {par_exp} abre_par exp fecha_par;
-
-unario_exp = {unario_exp} menos exp | negacao exp;
-
-binario_exp = 
-	{binario_exp_soma} exp soma exp |
-	{binario_exp_subtracao} exp subtracao exp |
-	{binario_exp_multiplicacao} exp multiplicacao exp |
-	{binario_exp_divisao} exp divisao exp |
-	{binario_exp_modulo} exp modulo exp |
-	{binario_exp_igual} exp igual exp |
-	{binario_exp_menor} exp menor exp |
-	{binario_exp_menor_igual} exp menor_igual exp |
-	{binario_exp_e} exp e exp |
-	{binario_exp_ou} exp ou exp;    
+ mais_exp = {mais_exp} pipe [mais]:exp;
+ lista_exp = {lista_exp} [lista]:exp? mais_exp*;
