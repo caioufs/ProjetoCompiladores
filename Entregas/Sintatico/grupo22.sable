@@ -148,27 +148,43 @@ Productions
  // Falta transformar isto em exp
  se_senao = {se_senao} se par_esq [primeira]:exp par_dir [segunda]:exp senao [terceira]:exp;
  
+ unarios = {negacao} exp 
+  | {negativo} menos exp
+  | {positivo} soma exp
+  | {expr} exp
+  
  exp = {termo} termo
   | {soma} exp soma termo
   | {menos} exp menos termo
-  | {menor} exp menor termo
+//| {menor} exp menor termo
   | {igual} exp igual termo
-  | {menor_igual} exp menor_igual termo
+//| {menor_igual} exp menor_igual termo
   | {negacao} negacao exp_bool
   | {negativo} menos termo
   | {e} exp e termo 
   // Deixei deste jeito pois nao sabia se o ou era '|' ou 'ou', ja que no codigo de exemplo (pesos.btv) 
   // esta como '|' mas na documentação esta como 'ou' (Linha Abaixo)
-  | {ou} exp ou termo
+//| {ou} exp ou termo
   | {bloco} bloco
  ;
-   
- exp_bool = {verdade} verdade | {falso} falso;
+ 
+desigualdades = {expr} expr
+  | {menor} exp menor exp
+  | {menor_igual} exp menor_igual exp
+  
+igualdade = {igual} exp igual exp
+
+exp_e = {expr_e} exp e exp
+
+exp_ou = {expr_ou} exp ou exp
+
+exp_bool = {verdade} verdade | {falso} falso;
   	
  termo = {fator} fator
   | {mult} termo mult fator
   | {div} termo div fator
   | {mod} termo mod fator
+  | {ou} exp ou termo
  ;
 
  fator = {numeros} numeros
