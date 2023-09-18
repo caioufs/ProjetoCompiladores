@@ -148,66 +148,58 @@ Productions
  // Falta transformar isto em exp
  se_senao = {se_senao} se par_esq [primeira]:exp par_dir [segunda]:exp senao [terceira]:exp;
  
- unarios = {negacao} exp 
-  | {negativo} menos exp
-  | {positivo} soma exp
-  | {expr} exp
   
- exp = {termo} termo
-  | {soma} exp soma termo
-  | {menos} exp menos termo
-//| {menor} exp menor termo
-  | {igual} exp igual termo
-//| {menor_igual} exp menor_igual termo
-  | {negacao} negacao exp_bool
-  | {negativo} menos termo
-  | {e} exp e termo 
+// exp = {termo} termo
+//  | {soma} exp soma termo
+//  | {menos} exp menos termo
+//  | {menor} exp menor termo
+//  | {igual} exp igual termo
+//  | {menor_igual} exp menor_igual termo
+//  | {negacao} negacao exp_bool
+//  | {negativo} menos termo
+//  | {e} exp e termo 
   // Deixei deste jeito pois nao sabia se o ou era '|' ou 'ou', ja que no codigo de exemplo (pesos.btv) 
   // esta como '|' mas na documentação esta como 'ou' (Linha Abaixo)
-//| {ou} exp ou termo
-  | {bloco} bloco
+//  | {ou} exp ou termo
+//  | {bloco} bloco
  ;
- exp = {prio1} prio1 
+ ternario_exp = {ternario} ternario;
+    
+ternario {-> ternario} = {exp} exp
+  | {ternario} se par_esq exp par_dir [ternario_se]:ternario senao [ternario_senao]:ternario;
+  
+ exp {-> exp} = {prio1} prio1 
   |{comp_ou} exp comp_ou prio1;
 
-prio1 =
-    {prio2} prio2
-    |{e} prio1 e prio2;
+prio1 {-> prio1}= {prio2} prio2 {-> prio2.prio1}
+  |{e} [left]:prio1 e [right]:prio2 {prio1.e(left.prio1, right.prio2) }
+;
 
-prio2 =
-    {prio3} prio3
-    |{igual} prio2 igual prio3;
+prio2 {-> prio2}= {prio3} prio3 {-> prio3.prio2}
+  |{igual} [left]:prio2 igual [right]:prio3 {-> New prio2.igual(left.prio2, right.prio3)}
+;
 
-prio3 =
-    {prio4} prio4
-    |{menor_igual} prio3 menor_igual prio4
-    |{menor} prio3 menor prio4;
+prio3 {-> prio3} = {prio4} prio4 {-> prio4.prio3}
+  |{menor_igual} [left]:prio3 menor_igual [right]:prio4 {New prio3.menor_igual()}
+  |{menor} [left]:prio3 menor [right]:prio4;
 
-prio4 =
-    {prio5} prio5
-    |{soma} prio4 soma prio5
-    |{menos} prio4 menos prio5;
+prio4 {-> prio4} = {prio5} prio5
+  |{soma} [left]:prio4 soma [right]:prio5
+  |{menos} [left]:prio4 menos [right]:prio5;
 
-prio5 =
-    {prio6} prio6
-    |{mult} prio5 mult prio6
-    |{div} prio5 div prio6
-    |{mod} prio5 mod prio6;
+prio5 {-> prio5} = {prio6} prio6
+  |{mult} [left]:prio5 mult [right]:prio6
+  |{div} [left]:prio5 div [right]:prio6
+  |{mod} [left]:prio5 mod [right]:prio6;
     
-prio6 =
-    {prio7} prio7
-    |{negacao} negacao prio7
-    |{negativo} menos prio7;
+prio6 {-> prio6} =  {prio7} prio7
+  |{negacao} negacao prio7
+  |{negativo} menos prio7;
+    
 
 exp_bool = {verdade} verdade | {falso} falso;
-  	
- termo = {fator} fator
-  | {mult} termo mult fator
-  | {div} termo div fator
-  | {mod} termo mod fator
- ;
 
- fator = {numeros} numeros
+prio7 {-> prio7} = {numeros} numeros
   | {string} string
   | {bool} exp_bool
   | {parenteses} par_esq exp par_dir
@@ -215,7 +207,24 @@ exp_bool = {verdade} verdade | {falso} falso;
   | {chamada} chamada
   | {id} id
   | {atributo} atributo
- ;
+  | {bloco} bloco
+ ;  	
+ 
+ //termo = {fator} fator
+ // | {mult} termo mult fator
+ // | {div} termo div fator
+ // | {mod} termo mod fator
+// ;
+
+ //fator = {numeros} numeros
+ // | {string} string
+ // | {bool} exp_bool
+ // | {parenteses} par_esq exp par_dir
+ // | {instancia} instancia
+ // | {chamada} chamada
+ // | {id} id
+ // | {atributo} atributo
+ //;
     
  instancia = {instancia} id_molde abre_bloco lista_inicializacao fecha_bloco;
 
@@ -228,5 +237,5 @@ exp_bool = {verdade} verdade | {falso} falso;
  // deixei sem ponto e virgula
  chamada = {chamada} id mais_id* par_esq lista_exp par_dir;
 
- mais_exp = {mais_exp} pipe [mais]:exp;
- lista_exp = {lista_exp} [lista]:exp? mais_exp*;
+ mais_exp {-> mais_exp} = {mais_exp} pipe [mais]:exp ;
+ lista_ex {-> lista_exp} = {lista_exp} [lista]:exp? mais_exp*;
