@@ -30,6 +30,7 @@ Tokens
  // Atributos Principais
  molde = 'molde';
  se = 'se';
+ entao = 'entao';
  senao = 'senao';
  passa = 'passa';
  por = 'por';
@@ -97,11 +98,11 @@ Productions
  programa = {programa} familia? def_molde+;
  
  familia_opcional = {familia_opcional} ponto_virgula relacao;
- familia = {familia} relacao familia_opcional* ponto;
+ familia = {familia} [esq]:relacao [dir]:familia_opcional* ponto;
  
  relacao = {relacao} molde [esq]:id_molde se passa por [dir]:id_molde;
  
- def_molde = {def_molde} molde id_molde contem atributos metodos fim;
+ def_molde = {def_molde} molde [esq]:id_molde contem atributos metodos fim;
  
  attr_aux = {dec_cons} dec_cons | {dec_obj} dec_obj;
  atributos = {atributos} attr_aux*;
@@ -117,8 +118,8 @@ Productions
  tipo = {tipo_molde} tipo_molde | {tipo_primitivo} tipo_primitivo;
  
  dec_funcao =
- 	{dec_funcao} dois_maior? funcao dois_pontos tipo id [fe]:par_esq parametros [fd]:par_dir bloco |
- 	{dec_funcao_sem_bloco} dois_maior? funcao dois_pontos tipo id [fwbe]:par_esq parametros [fwbd]:par_dir ponto_virgula
+  {dec_funcao} dois_maior? funcao dois_pontos tipo id [fe]:par_esq parametros [fd]:par_dir bloco |
+  {dec_funcao_sem_bloco} dois_maior? funcao dois_pontos tipo id [fwbe]:par_esq parametros [fwbd]:par_dir ponto_virgula
  ;
  
  mais_parametro = {mais_parametro} pipe parametro;
@@ -133,99 +134,65 @@ Productions
  conteudo_bloco = {dec_cons} dec_cons | {dec_obj} dec_obj | {definicao} definicao; 
  bloco = {bloco} abre_bloco conteudo_bloco* exp ponto_virgula? fecha_bloco;
  
- // ---------------------------------------------------------------------------------------------------------- //
- // Esta parte aqui não consegui resolver junto com o exp pois como reduzem para o mesmo sem o ponto e virgula //
- // Acabei por optar em deixar o exp, já q dava shift/reduce, deixarei como estava antes abaixo                //
- // ---------------------------------------------------------------------------------------------------------- //
- // definicao_aux = {t} id | {t2} atributo;																	   //
- // definicao = {definicao} conteudo_definicao igual exp ponto_virgula; (Código Antigo)						   //
- // ---------------------------------------------------------------------------------------------------------- //
  definicao = {definicao} exp ponto_virgula;
  
  mais_id = {mais_id} ponto id;
  atributo = {atributo} id mais_id+;
+
+ //ternario_exp = {ternario} ternario;
+ //ternario = {ternario} se par_esq [ternario_se]:exp par_dir entao [ternario_entao]:exp senao [ternario_senao]:exp;
+ //ternario = {exp} exp
+ // | {ternario} se par_esq exp par_dir entao [ternario_entao]:ternario [ternario_se]:ternario senao [ternario_senao]:ternario
+ //;
  
- // Falta transformar isto em exp
- se_senao = {se_senao} se par_esq [primeira]:exp par_dir [segunda]:exp senao [terceira]:exp;
- 
-  
-// exp = {termo} termo
-//  | {soma} exp soma termo
-//  | {menos} exp menos termo
-//  | {menor} exp menor termo
-//  | {igual} exp igual termo
-//  | {menor_igual} exp menor_igual termo
-//  | {negacao} negacao exp_bool
-//  | {negativo} menos termo
-//  | {e} exp e termo 
-  // Deixei deste jeito pois nao sabia se o ou era '|' ou 'ou', ja que no codigo de exemplo (pesos.btv) 
-  // esta como '|' mas na documentação esta como 'ou' (Linha Abaixo)
-//  | {ou} exp ou termo
-//  | {bloco} bloco
+ prio1 {-> a_exp} = {prio2} prio2 {-> prio2.a_exp}
+  | {e} [esq]:prio1 e [dir]:prio2 {-> New a_exp.a_e(esq.a_exp, dir.a_exp)}
  ;
- ternario_exp = {ternario} ternario;
+
+ prio2 {-> a_exp} = {prio3} prio3 {-> prio3.a_exp}
+  | {igual} [esq]:prio2 igual [dir]:prio3  {-> New a_exp.a_igual(esq.a_exp, dir.a_exp)}
+ ;
+
+ prio3 {-> a_exp} = {prio4} prio4 {-> prio4.a_exp}
+  | {menor_igual} [esq]:prio3 menor_igual [dir]:prio4 {-> New a_exp.a_menor_igual(esq.a_exp, dir.a_exp)}
+  | {menor} [esq]:prio3 menor [dir]:prio4 {-> New a_exp.a_menor(esq.a_exp, dir.a_exp)}
+ ;
+
+ prio4 {-> a_exp} = {prio5} prio5 {-> prio5.a_exp}
+  | {soma} [esq]:prio4 soma [dir]:prio5 {-> New a_exp.a_soma(esq.a_exp, dir.a_exp)}
+  | {menos} [esq]:prio4 menos [dir]:prio5 {-> New a_exp.a_menos(esq.a_exp, dir.a_exp)}
+ ;
+
+ prio5 {-> a_exp} = {prio6} prio6 {-> prio6.a_exp}
+  | {mult} [esq]:prio5 mult [dir]:prio6 {-> New a_exp.a_mult(esq.a_exp, dir.a_exp)} 
+  | {div} [esq]:prio5 div [dir]:prio6 {-> New a_exp.a_div(esq.a_exp, dir.a_exp)} 
+  | {mod} [esq]:prio5 mod [dir]:prio6 {-> New a_exp.a_mod(esq.a_exp, dir.a_exp)}
+ ;
     
-ternario {-> ternario} = {exp} exp
-  | {ternario} se par_esq exp par_dir [ternario_se]:ternario senao [ternario_senao]:ternario;
-  
- exp {-> exp} = {prio1} prio1 
-  |{comp_ou} exp comp_ou prio1;
+ prio6 {-> a_exp} = {prio7} prio7 {-> prio7.a_exp}
+  | {negacao} negacao [neg]:prio7 {-> New a_exp.a_negacao(neg.a_exp)}
+  | {negativo} menos [men]:prio7 {-> New a_exp.a_negativo(men.a_exp)}
+ ;
 
-prio1 {-> prio1}= {prio2} prio2 {-> prio2.prio1}
-  |{e} [left]:prio1 e [right]:prio2 {prio1.e(left.prio1, right.prio2) }
-;
+ //exp_bool = {verdade} verdade | {falso} falso;
 
-prio2 {-> prio2}= {prio3} prio3 {-> prio3.prio2}
-  |{igual} [left]:prio2 igual [right]:prio3 {-> New prio2.igual(left.prio2, right.prio3)}
-;
-
-prio3 {-> prio3} = {prio4} prio4 {-> prio4.prio3}
-  |{menor_igual} [left]:prio3 menor_igual [right]:prio4 {New prio3.menor_igual()}
-  |{menor} [left]:prio3 menor [right]:prio4;
-
-prio4 {-> prio4} = {prio5} prio5
-  |{soma} [left]:prio4 soma [right]:prio5
-  |{menos} [left]:prio4 menos [right]:prio5;
-
-prio5 {-> prio5} = {prio6} prio6
-  |{mult} [left]:prio5 mult [right]:prio6
-  |{div} [left]:prio5 div [right]:prio6
-  |{mod} [left]:prio5 mod [right]:prio6;
-    
-prio6 {-> prio6} =  {prio7} prio7
-  |{negacao} negacao prio7
-  |{negativo} menos prio7;
-    
-
-exp_bool = {verdade} verdade | {falso} falso;
-
-prio7 {-> prio7} = {numeros} numeros
-  | {string} string
-  | {bool} exp_bool
-  | {parenteses} par_esq exp par_dir
+ prio7 {-> a_exp} = {numeros} numeros {-> New a_exp.a_numeros(numeros)}
+  | {string} string {-> New a_exp.a_string(string)}
+  | {verdade} verdade {-> New a_exp.a_vdd(verdade)}
+  | {falso} falso {-> New a_exp.a_falso(falso)}
+  | {parenteses} par_esq [expr]:exp par_dir {-> New a_exp.a_parenteses(expr.a_exp)}
   | {instancia} instancia
   | {chamada} chamada
   | {id} id
   | {atributo} atributo
   | {bloco} bloco
- ;  	
- 
- //termo = {fator} fator
- // | {mult} termo mult fator
- // | {div} termo div fator
- // | {mod} termo mod fator
-// ;
+ ;
 
- //fator = {numeros} numeros
- // | {string} string
- // | {bool} exp_bool
- // | {parenteses} par_esq exp par_dir
- // | {instancia} instancia
- // | {chamada} chamada
- // | {id} id
- // | {atributo} atributo
- //;
-    
+ exp {-> a_exp} =
+  {comp_ou} [esq]:exp ou [dir]:prio1 {-> New a_exp.a_or(esq.a_exp, dir.a_exp)}
+  | {prio1} prio1 {-> prio1.a_exp}
+ ;
+
  instancia = {instancia} id_molde abre_bloco lista_inicializacao fecha_bloco;
 
  mais_inicializacao_objeto = {mais_inicializacao_objeto} pipe inicializacao_objeto;
@@ -233,9 +200,30 @@ prio7 {-> prio7} = {numeros} numeros
 
  inicializacao_objeto = {inicializacao_objeto} objeto ponto id mais_id* igual [init]:exp;
 
- // Aqui no codigo exemplo (pesos.btv) esta com ponto_virgula, porem como na documentação da linguagem esta sem
- // deixei sem ponto e virgula
- chamada = {chamada} id mais_id* par_esq lista_exp par_dir;
+ lista_exp = {lista_exp} [lista]:exp? mais_exp*;
+ mais_exp = {mais_exp} pipe [mais]:exp;
 
- mais_exp {-> mais_exp} = {mais_exp} pipe [mais]:exp ;
- lista_ex {-> lista_exp} = {lista_exp} [lista]:exp? mais_exp*;
+ chamada = {chamada} id mais_id* par_esq lista_exp par_dir;
+ 
+Abstract Syntax Tree
+
+a_exp = {a_ou} [esq]:a_exp [dir]:a_exp
+ | {a_e} [esq]:a_exp [dir]:a_exp
+ | {a_or} [esq]:a_exp [dir]:a_exp
+ | {a_igual} [esq]:a_exp [dir]:a_exp
+ | {a_menor} [esq]:a_exp [dir]:a_exp
+ | {a_menor_igual} [esq]:a_exp [dir]:a_exp
+ | {a_soma} [esq]:a_exp [dir]:a_exp
+ | {a_menos} [esq]:a_exp [dir]:a_exp
+ | {a_mult} [esq]:a_exp [dir]:a_exp
+ | {a_div} [esq]:a_exp [dir]:a_exp
+ | {a_mod} [esq]:a_exp [dir]:a_exp
+ | {a_negativo} [men]:a_exp
+ | {a_negacao} [neg]:a_exp
+ | {a_numeros} numeros
+ | {a_string} string
+ | {a_vdd} verdade
+ | {a_falso} falso
+ | {a_parenteses} [par]:a_exp 
+;
+
