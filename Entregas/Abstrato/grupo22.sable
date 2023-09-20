@@ -94,8 +94,8 @@ Ignored Tokens
  vazio;
  
 Productions
-
- programa = {programa} familia? def_molde+;
+ p_programa {-> a_programa} = {p_programa} [expr]:exp {-> New a_programa.programa(expr.a_exp)}; // Test Only
+ //programa = {programa} familia? def_molde+;
  
  familia_opcional = {familia_opcional} ponto_virgula relacao;
  familia = {familia} [esq]:relacao [dir]:familia_opcional* ponto;
@@ -131,7 +131,7 @@ Productions
  parametros_assinatura = {parametros_assinatura} parametro_assinatura? mais_parametros_assinatura*;
  parametro_assinatura = {tipo} tipo | {assinatura} assinatura;
  
- conteudo_bloco = {dec_cons} dec_cons | {dec_obj} dec_obj | {definicao} definicao; 
+ conteudo_bloco = {dec_cons} dec_cons | {dec_obj} dec_obj | {definicao} definicao;
  bloco = {bloco} abre_bloco conteudo_bloco* exp ponto_virgula? fecha_bloco;
  
  definicao = {definicao} exp ponto_virgula;
@@ -139,11 +139,15 @@ Productions
  mais_id = {mais_id} ponto id;
  atributo = {atributo} id mais_id+;
 
- //ternario_exp = {ternario} ternario;
- //ternario = {ternario} se par_esq [ternario_se]:exp par_dir entao [ternario_entao]:exp senao [ternario_senao]:exp;
- //ternario = {exp} exp
- // | {ternario} se par_esq exp par_dir entao [ternario_entao]:ternario [ternario_se]:ternario senao [ternario_senao]:ternario
- //;
+ ternario = {exp} exp
+  | {ternario} se par_esq exp par_dir entao [ternario_entao]:ternario senao [ternario_senao]:ternario
+ ;
+ 
+ // Expressão
+ exp {-> a_exp} =
+  {comp_ou} [esq]:exp ou [dir]:prio1 {-> New a_exp.a_or(esq.a_exp, dir.a_exp)}
+  | {prio1} prio1 {-> prio1.a_exp}
+ ;
  
  prio1 {-> a_exp} = {prio2} prio2 {-> prio2.a_exp}
   | {e} [esq]:prio1 e [dir]:prio2 {-> New a_exp.a_e(esq.a_exp, dir.a_exp)}
@@ -174,24 +178,19 @@ Productions
   | {negativo} menos [men]:prio7 {-> New a_exp.a_negativo(men.a_exp)}
  ;
 
- //exp_bool = {verdade} verdade | {falso} falso;
-
  prio7 {-> a_exp} = {numeros} numeros {-> New a_exp.a_numeros(numeros)}
   | {string} string {-> New a_exp.a_string(string)}
   | {verdade} verdade {-> New a_exp.a_vdd(verdade)}
   | {falso} falso {-> New a_exp.a_falso(falso)}
-  | {parenteses} par_esq [expr]:exp par_dir {-> New a_exp.a_parenteses(expr.a_exp)}
-  | {instancia} instancia
-  | {chamada} chamada
-  | {id} id
-  | {atributo} atributo
-  | {bloco} bloco
+  | {parenteses} par_esq exp par_dir {-> exp.a_exp}
+  //| {instancia} instancia
+  //| {chamada} chamada
+  | {id} id {-> New a_exp.a_id(id)}
+  //| {atributo} atributo
+  //| {bloco} bloco
  ;
-
- exp {-> a_exp} =
-  {comp_ou} [esq]:exp ou [dir]:prio1 {-> New a_exp.a_or(esq.a_exp, dir.a_exp)}
-  | {prio1} prio1 {-> prio1.a_exp}
- ;
+ 
+ // Fim expressao
 
  instancia = {instancia} id_molde abre_bloco lista_inicializacao fecha_bloco;
 
@@ -206,6 +205,8 @@ Productions
  chamada = {chamada} id mais_id* par_esq lista_exp par_dir;
  
 Abstract Syntax Tree
+
+a_programa = {programa} a_exp; // Tem que ajeitar isso aqui antes de entregar
 
 a_exp = {a_ou} [esq]:a_exp [dir]:a_exp
  | {a_e} [esq]:a_exp [dir]:a_exp
@@ -224,6 +225,6 @@ a_exp = {a_ou} [esq]:a_exp [dir]:a_exp
  | {a_string} string
  | {a_vdd} verdade
  | {a_falso} falso
- | {a_parenteses} [par]:a_exp 
+ | {a_id} id
 ;
 
