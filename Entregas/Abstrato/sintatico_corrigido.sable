@@ -1,0 +1,206 @@
+Package bemtevi;
+
+Helpers
+ digito = ['0' .. '9'];
+ minusculo = ['a' .. 'z'];
+ maiusculo = ['A' .. 'Z'];
+ letra = (maiusculo | minusculo);
+ letras = letra*;
+ digitos = digito*;
+ numero_real = digitos+','+digitos;
+ id_cientifico = ('e' | 'E');
+ notacao_cientifica = digito+id_cientifico+('-'?)+digitos;
+ letras_ou_digitos = letras | digitos;
+ underline = '_';
+ espaco = ' ';
+ tudo_unicode = [0..0xffff];
+ string_input = [tudo_unicode - ['''+'"']];
+ comentario_blc = [tudo_unicode - '{'];
+ rc = 13;
+ nl = 10;
+ ht	= 0x0009;
+ lf	= 0x000a;
+ ff	= 0x000c;
+ cr	= 0x000d;
+ eol = cr | nl | cr | nl ;
+ blank = rc | nl | ht | lf | ff | cr;
+ 
+Tokens
+
+ // Atributos Principais
+ molde = 'molde';
+ se = 'se';
+ entao = 'entao';
+ senao = 'senao';
+ passa = 'passa';
+ por = 'por';
+ contem = 'contem';
+ fim = 'fim';
+ constante = 'constante';
+ funcao = 'funcao';
+ objeto = 'objeto';
+ string = (''' string_input* ''' | '"' string_input* '"');
+ 
+ // Tipos
+ bool = 'Bool';
+ numero = 'Numero';
+ texto = 'Texto';
+ verdade = 'verdade';
+ falso = 'falso';
+ 
+
+ // Operacoes Matematicas e Logicas
+ numeros = digitos | numero_real | notacao_cientifica;
+ soma = '+';
+ menos = '-';
+ mult = '*';
+ div = '/';
+ mod = '%';
+ igual = '=';
+ menor = '<';
+ menor_igual = '<=';
+ comparacao = '==';
+ negacao = '!';
+ dois_maior = '>>';
+ e = 'e';
+ ou = 'ou';
+ 
+ // Delimitadores
+ abre_bloco = '[';
+ fecha_bloco = ']';
+ par_esq = '(';
+ par_dir = ')';
+ dois_pontos = ':';
+ virgula = ',';
+ ponto_virgula = ';';
+ ponto = '.';
+ pipe = '|';
+ 
+ // Identificadores
+ id_molde = maiusculo letras_ou_digitos*;
+ id = minusculo (letras_ou_digitos | underline)*;
+ 
+ // Vazio
+ vazio = (espaco | '\t' | '\n' | '\r' | blank)+;
+ 
+ // Comentarios
+ comentario_linha = ('--'[tudo_unicode-[cr+nl]]*);
+ comentario_bloco = ('{'comentario_blc*'}');
+
+
+Ignored Tokens
+ comentario_bloco,
+ comentario_linha,
+ vazio;
+ 
+Productions
+
+ programa = {programa} familia? def_molde+;
+ 
+ familia_opcional = {familia_opcional} ponto_virgula relacao;
+ familia = {familia} relacao familia_opcional* ponto;
+ 
+ relacao = {relacao} molde [esq]:id_molde se passa por [dir]:id_molde;
+ 
+ def_molde = {def_molde} molde id_molde contem atributos metodos fim;
+ 
+ attr_aux = {dec_cons} dec_cons | {dec_obj} dec_obj;
+ atributos = {atributos} attr_aux*;
+ metodos = {metodos} dec_funcao*;
+ 
+ dec_cons = {dec_cons} constante dois_pontos tipo_primitivo id ponto_virgula 
+  | {dec_const_init} constante dois_pontos tipo_primitivo id igual exp ponto_virgula 
+ ;
+ dec_obj = {dec_obj} objeto dois_pontos tipo_molde id ponto_virgula;
+ 
+ tipo_primitivo = {bool} bool | {numero} numero | {texto} texto;
+ tipo_molde = {tipo_molde} id_molde;
+ tipo = {tipo_molde} tipo_molde | {tipo_primitivo} tipo_primitivo;
+ 
+ dec_funcao =
+  {dec_funcao} dois_maior? funcao dois_pontos tipo id [fe]:par_esq parametros [fd]:par_dir bloco |
+  {dec_funcao_sem_bloco} dois_maior? funcao dois_pontos tipo id [fwbe]:par_esq parametros [fwbd]:par_dir ponto_virgula
+ ;
+ 
+ mais_parametro = {mais_parametro} pipe parametro;
+ parametros = {parametros} parametro? mais_parametro*;
+ parametro = {parametro} tipo id | {assinatura} assinatura;
+ 
+ assinatura = {assinatura} tipo id par_esq parametros_assinatura par_dir;
+ mais_parametros_assinatura = {mais_parametros_assinatura} pipe parametro_assinatura;
+ parametros_assinatura = {parametros_assinatura} parametro_assinatura? mais_parametros_assinatura*;
+ parametro_assinatura = {tipo} tipo | {assinatura} assinatura;
+ 
+ conteudo_bloco = {dec_cons} dec_cons | {dec_obj} dec_obj | {definicao} definicao; 
+ bloco = {bloco} abre_bloco conteudo_bloco* exp ponto_virgula? fecha_bloco;
+ 
+ definicao = {definicao} exp ponto_virgula;
+ 
+ mais_id = {mais_id} ponto id;
+ atributo = {atributo} id mais_id+;
+
+ //ternario_exp = {ternario} ternario;
+ //ternario = {ternario} se par_esq [ternario_se]:exp par_dir entao [ternario_entao]:exp senao [ternario_senao]:exp;
+
+ //ternario = {exp} exp
+ // | {ternario} se par_esq exp par_dir entao [ternario_entao]:ternario [ternario_se]:ternario senao [ternario_senao]:ternario
+ //;
+
+ prio1 = {prio2} prio2
+  |{e} [left]:prio1 e [right]:prio2
+ ;
+
+ prio2 = {prio3} prio3
+  |{igual} [left]:prio2 igual [right]:prio3
+ ;
+
+ prio3 = {prio4} prio4
+  | {menor_igual} [left]:prio3 menor_igual [right]:prio4
+  | {menor} [left]:prio3 menor [right]:prio4
+ ;
+
+ prio4 = {prio5} prio5
+  |{soma} [left]:prio4 soma [right]:prio5
+  |{menos} [left]:prio4 menos [right]:prio5
+ ;
+
+ prio5 = {prio6} prio6
+  |{mult} [left]:prio5 mult [right]:prio6
+  |{div} [left]:prio5 div [right]:prio6
+  |{mod} [left]:prio5 mod [right]:prio6
+ ;
+    
+ prio6 =  {prio7} prio7
+  |{negacao} negacao prio7
+  |{negativo} menos prio7
+ ;
+
+ exp_bool = {verdade} verdade | {falso} falso;
+
+ prio7 = {numeros} numeros
+  | {string} string
+  | {bool} exp_bool
+  | {parenteses} par_esq exp par_dir
+  | {instancia} instancia
+  | {chamada} chamada
+  | {id} id
+  | {atributo} atributo
+  | {bloco} bloco
+ ;
+
+ exp = {prio1} prio1
+  | {comp_ou} exp ou prio1
+ ;
+
+ instancia = {instancia} id_molde abre_bloco lista_inicializacao fecha_bloco;
+
+ mais_inicializacao_objeto = {mais_inicializacao_objeto} pipe inicializacao_objeto;
+ lista_inicializacao = {lista_inicializacao} inicializacao_objeto mais_inicializacao_objeto*;
+
+ inicializacao_objeto = {inicializacao_objeto} objeto ponto id mais_id* igual [init]:exp;
+
+ lista_exp = {lista_exp} [lista]:exp? mais_exp*;
+ mais_exp = {mais_exp} pipe [mais]:exp;
+
+ chamada = {chamada} id mais_id* par_esq lista_exp par_dir;
+
